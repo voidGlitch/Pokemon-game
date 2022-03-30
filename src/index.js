@@ -1,11 +1,9 @@
-console.log("hello");
-console.log(collision);
 //selector query selects a particular element in the html given in the feilds
 const canvas = document.querySelector("canvas");
 //getContext() method returns a drawing context on the canvas, or null if the context identifier is not supported, or the canvas has already been set to a different context mode.
 const c = canvas.getContext("2d");
-canvas.width = 1024;
-canvas.height = 576;
+canvas.width = 1250;
+canvas.height = 600;
 
 // Step -1 Now its time we comment out these code that we use to seperate our canvas from the background
 // c.fillStyle = "white";
@@ -23,7 +21,7 @@ for (let i = 0; i < collision.length; i += 70) {
   //next one slice(70,140) and keeps increment by 70
   collisionMap.push(collision.slice(i, 70 + i));
 }
-console.log(collisionMap);
+// console.log(collisionMap);
 //create image within the javascript
 
 //Now we created a class which will represent our rectangle tiles in red colour
@@ -39,13 +37,13 @@ class Boundary {
   //Step 3 now we used to draw the square object
   draw() {
     // NOW we used fill color red of canvas context and define the position of x and y
-    c.fillStyle = "red";
+    c.fillStyle = "rgba(255,0,0,0)";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 }
 
 const offset = {
-  x: -870,
+  x: -750,
   y: -1500,
 };
 const boundaries = [];
@@ -61,40 +59,83 @@ collisionMap.forEach((row, i) => {
             // j is the value where the symbol is diagonally then multiply it by 90 which gives us the exact position of the boundary on x axis same as y position but on horizontal
             //we write offset.x that gonna subtact the width and the height so the position is centralized
             x: j * Boundary.width + offset.x,
-            y: i * Boundary.height + offset.y,
+            y: i * Boundary.height + offset.y + 20,
           },
         })
       );
     }
   });
 });
-console.log(boundaries);
+// console.log(boundaries);
 
 const image = new Image();
 image.src = "../Pokemon Assets/PalletTown1.png";
-console.log(image);
 //requires 3 argument one is src second third for the position of x and y for the drawn image
 // c.drawImage(image, 0, 0);
 //❌but we can't show the image because the screen load the image before it initalize
 const playerImage = new Image();
 playerImage.src = "../Pokemon Assets/playerDown.png";
-console.log(playerImage);
 
 //created a class sprite in which we are going to define constructor which we can use in neat way
 //A constructor is a special function that creates and initializes an object instance of a class
 class Sprite {
-  constructor({ velocity, image, position }) {
+  constructor({
+    velocity,
+    image,
+    position,
+    // We use a draw function for two things one is player and second is background for bg it has max 1 frame but for player it can be overwrite
+    frames = {
+      max: 1,
+    },
+  }) {
     this.position = position;
     this.image = image;
+    this.frames = frames;
+    this.image.onload = () => {
+      this.width = this.image.width / this.frames.max;
+      this.height = this.image.height / this.frames.max;
+      // Firstly it will give us the width and height of bg image and then of the players
+      console.log(this.width);
+      console.log(this.height);
+    };
   }
   //as image is outside the class so we need to define it inside the class body
   draw() {
     // in this we are refrencing the position from the obj we created
-    c.drawImage(this.image, this.position.x, this.position.y);
+    // c.drawImage(this.image, this.position.x, this.position.y);
+    //9 We comment out upper code because we need only one draw function but the position is sliced by the previous player draw funtion
+    c.drawImage(
+      this.image,
+      0,
+      0,
+      this.image.width / this.frames.max,
+      this.image.height,
+      //width/4 is because we can render the image at center of the village
+      //these are called actual (postion) of the image this shows the actual player image position ,width and height
+      // canvas.width / 2 - this.image.width / 4,
+      // canvas.height / 2 - this.image.height / 2, We do not these code as these are player attributes and for background we have its offset x and y positions
+      this.position.x,
+      this.position.y,
+      //this gives us the full width of the bg image
+      this.image.width / this.frames.max,
+      this.image.height
+    );
   }
 }
 
-//defining constructor
+const player = new Sprite({
+  position: {
+    //9 we remove this.image.width and height because the image is not static so we see the dimensions of our player and used it instead
+    x: canvas.width / 2 - 192 / 4,
+    y: canvas.height / 2 - 68 / 2,
+  },
+  image: playerImage,
+  frames: {
+    max: 4,
+  },
+});
+
+//defining background
 const background = new Sprite({
   position: {
     x: offset.x,
@@ -138,38 +179,224 @@ const key = {
 };
 // Now as we are pressing the key down the value is becoming true but we dont want that we need to make the value false on key up so we created a new function
 
+//10 Temperary boundary
+// const testBoundary = new Boundary({
+//   position: {
+//     x: 400,
+//     y: 400,
+//   },
+// });
+
+// Step 8 Now as our project is expanding we are declaring some items as movables items and then iterate over them to increment their positions
+//Step 10 Now as our collision is complete we can now move toward real boundary instead of a temporary one
+// const Movables = [background, testBoundary];
+const Movables = [background, ...boundaries];
+function rectangularCollison({ rectangle1, rectangle2 }) {
+  return (
+    //for left collision
+    rectangle2.position.x <= rectangle1.position.x + rectangle1.width &&
+    //for rigth side collision
+    rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
+    //for down side collision
+    rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
+    //for upside collision
+    rectangle1.position.y + rectangle1.width >= rectangle2.position.y - 15
+    //❌Here we subtract -15 just to sub some position as player was passing passing the boundaries but not colliding dont know why)
+  );
+}
 function animate() {
   //The window.requestAnimationFrame() method tells the browser that you wish to perform an animation and requests that the browser calls a specified function to update an animation before the next repaint. The method takes a callback as an argument to be invoked before the repaint.
   window.requestAnimationFrame(animate);
-  console.log(animate);
+  // console.log(animate);
   // Step 6 Now we draw our collision tiles on the map
   background.draw();
+  //Step 7 For now we are commenting out our collisions and taking a test boundary for it
   boundaries.forEach((boundary) => {
     boundary.draw();
+    // if (
+    //   rectangularCollison({
+    //     rectangle1: player,
+    //     rectangle2: boundary,
+    //   })
+    // ) {
+    //   //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
+    //   console.log("colliding");
+    // }
   });
-  c.drawImage(
-    playerImage,
-    0,
-    0,
-    playerImage.width / 4,
-    playerImage.height,
-    //width/4 is because we can render the image at center of the village
-    //these are called actual (postion) of the image this shows the actual player image position ,width and height
-    canvas.width / 2 - playerImage.width / 4,
-    canvas.height / 2 - playerImage.height / 2,
-    playerImage.width / 4,
-    playerImage.height
-  );
-  // This is logic created to use on press key changes the image of background but now our character position && last key is used to give a smooth animation so that if we press both the key at the same time it won't stuck
+  player.draw();
+  //9 Now to get the player dimensions we need to define player as an object in the spirit class
+
+  // refactoring the code draw in sprite class c.drawImage(
+  //   playerImage,
+  //   0,
+  //   0,
+  //   playerImage.width / 4,
+  //   playerImage.height,
+  //   //width/4 is because we can render the image at center of the village
+  //   //these are called actual (postion) of the image this shows the actual player image position ,width and height
+  //   canvas.width / 2 - playerImage.width / 4,
+  //   canvas.height / 2 - playerImage.height / 2,
+  //   playerImage.width / 4,
+  //   playerImage.height
+  // );
+
+  //Step 9 Important** So now we need to create some func when player is colliding with the boundaries we have left position of player to need the right position we just need to add the width of the player image to get the right side of the player
+
+  //10 Moving the boundary collision statement inside the Boudaries for each statement
+  // if (
+  //   rectangularCollison({
+  //     rectangle1: player,
+  //     // rectangle2: testBoundary,
+  //     rectangle2:boundary
+  //   })
+  // ) {
+  //   //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
+  //   console.log("colliding");
+  // }
+  //Step 11 : Collision Final Now we need to predect the future weather the player is going to collide or not
+
   if (key.w.pressed && lastKey === "w") {
+    // This is logic created to use on press key changes the image of background but now our character position && last key is used to give a smooth animation so that if we press both the key at the same time it won't stuck
     //background.position.y = background.position.y + 3
-    background.position.y += 5;
+    // background.position.y += 5;
+    // //So as we dont want our collision boundary to move by itself with us we do
+    // testBoundary.position.y += 5;
+    //11 Creating an variable which return false as soon as our player is going to collide
+    let moving = true;
+    //11 Moving on
+    for (let i = 0; i < boundaries.length; i++) {
+      //11 Now we dont have boundary so we define our own
+      const boundary = boundaries[i];
+      //Detect the collision
+      if (
+        rectangularCollison({
+          rectangle1: player,
+          //We just dont need boundary but also to predict if our player move by 3 pixel before it touch the boundary ...creates a clone of boundary object without overriding the original here we are overriding the clone by giving position
+          rectangle2: {
+            ...boundary,
+            position: {
+              x: boundary.position.x,
+              y: boundary.position.y + 3,
+            },
+            //11 now here only difference is that we are now detecting the collision before it collides
+          },
+        })
+      ) {
+        //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
+        console.log("colliding");
+        //Stops the player to move further
+        moving = false;
+        break;
+      }
+    }
+    if (moving)
+      Movables.forEach((movables) => {
+        movables.position.y += 3;
+      });
   } else if (key.a.pressed && lastKey === "a") {
-    background.position.x += 5;
+    // background.position.x += 5;
+    // testBoundary.position.x += 5; //11 Creating an variable which return false as soon as our player is going to collide
+    let moving = true;
+    //11 Moving on
+    for (let i = 0; i < boundaries.length; i++) {
+      //11 Now we dont have boundary so we define our own
+      const boundary = boundaries[i];
+      //Detect the collision
+      if (
+        rectangularCollison({
+          rectangle1: player,
+          //We just dont need boundary but also to predict if our player move by 3 pixel before it touch the boundary ...creates a clone of boundary object without overriding the original here we are overriding the clone by giving position
+          rectangle2: {
+            ...boundary,
+            position: {
+              x: boundary.position.x + 3,
+              y: boundary.position.y,
+            },
+            //11 now here only difference is that we are now detecting the collision before it collides
+          },
+        })
+      ) {
+        //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
+        console.log("colliding");
+        //Stops the player to move further
+        moving = false;
+        break;
+      }
+    }
+    if (moving)
+      Movables.forEach((movables) => {
+        movables.position.x += 3;
+      });
   } else if (key.s.pressed && lastKey === "s") {
-    background.position.y -= 5;
+    //11 Creating an variable which return false as soon as our player is going to collide
+    let moving = true;
+    //11 Moving on
+    for (let i = 0; i < boundaries.length; i++) {
+      //11 Now we dont have boundary so we define our own
+      const boundary = boundaries[i];
+      //Detect the collision
+      if (
+        rectangularCollison({
+          rectangle1: player,
+          //We just dont need boundary but also to predict if our player move by 3 pixel before it touch the boundary ...creates a clone of boundary object without overriding the original here we are overriding the clone by giving position
+          rectangle2: {
+            ...boundary,
+            position: {
+              x: boundary.position.x,
+              y: boundary.position.y - 3,
+            },
+            //11 now here only difference is that we are now detecting the collision before it collides
+          },
+        })
+      ) {
+        //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
+        console.log("colliding");
+        //Stops the player to move further
+        moving = false;
+        break;
+      }
+    }
+    if (moving)
+      // background.position.y -= 5;
+      // testBoundary.position.y -= 5;
+      Movables.forEach((movables) => {
+        movables.position.y -= 3;
+      });
   } else if (key.d.pressed && lastKey === "d") {
-    background.position.x -= 5;
+    //11 Creating an variable which return false as soon as our player is going to collide
+    let moving = true;
+    //11 Moving on
+    for (let i = 0; i < boundaries.length; i++) {
+      //11 Now we dont have boundary so we define our own
+      const boundary = boundaries[i];
+      //Detect the collision
+      if (
+        rectangularCollison({
+          rectangle1: player,
+          //We just dont need boundary but also to predict if our player move by 3 pixel before it touch the boundary ...creates a clone of boundary object without overriding the original here we are overriding the clone by giving position
+          rectangle2: {
+            ...boundary,
+            position: {
+              x: boundary.position.x - 3,
+              y: boundary.position.y,
+            },
+            //11 now here only difference is that we are now detecting the collision before it collides
+          },
+        })
+      ) {
+        //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
+        console.log("colliding");
+        //Stops the player to move further
+        moving = false;
+        break;
+      }
+    }
+    if (moving)
+      // background.position.x -= 5;
+      // testBoundary.position.x -= 5;
+      Movables.forEach((movables) => {
+        movables.position.x -= 3;
+      });
   }
 }
 animate();
