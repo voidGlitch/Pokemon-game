@@ -37,7 +37,8 @@ class Boundary {
   //Step 3 now we used to draw the square object
   draw() {
     // NOW we used fill color red of canvas context and define the position of x and y
-    c.fillStyle = "rgba(255,0,0,0)";
+    c.fillStyle = "red";
+    // c.fillStyle = "rgba(255,0,0,0)";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 }
@@ -276,7 +277,7 @@ function animate() {
             ...boundary,
             position: {
               x: boundary.position.x,
-              y: boundary.position.y + 3,
+              y: boundary.position.y + 5,
             },
             //11 now here only difference is that we are now detecting the collision before it collides
           },
@@ -291,7 +292,7 @@ function animate() {
     }
     if (moving)
       Movables.forEach((movables) => {
-        movables.position.y += 3;
+        movables.position.y += 5;
       });
   } else if (key.a.pressed && lastKey === "a") {
     // background.position.x += 5;
@@ -309,7 +310,7 @@ function animate() {
           rectangle2: {
             ...boundary,
             position: {
-              x: boundary.position.x + 3,
+              x: boundary.position.x + 5,
               y: boundary.position.y,
             },
             //11 now here only difference is that we are now detecting the collision before it collides
@@ -325,7 +326,7 @@ function animate() {
     }
     if (moving)
       Movables.forEach((movables) => {
-        movables.position.x += 3;
+        movables.position.x += 5;
       });
   } else if (key.s.pressed && lastKey === "s") {
     //11 Creating an variable which return false as soon as our player is going to collide
@@ -343,7 +344,7 @@ function animate() {
             ...boundary,
             position: {
               x: boundary.position.x,
-              y: boundary.position.y - 3,
+              y: boundary.position.y - 5,
             },
             //11 now here only difference is that we are now detecting the collision before it collides
           },
@@ -360,7 +361,7 @@ function animate() {
       // background.position.y -= 5;
       // testBoundary.position.y -= 5;
       Movables.forEach((movables) => {
-        movables.position.y -= 3;
+        movables.position.y -= 5;
       });
   } else if (key.d.pressed && lastKey === "d") {
     //11 Creating an variable which return false as soon as our player is going to collide
@@ -377,7 +378,7 @@ function animate() {
           rectangle2: {
             ...boundary,
             position: {
-              x: boundary.position.x - 3,
+              x: boundary.position.x - 5,
               y: boundary.position.y,
             },
             //11 now here only difference is that we are now detecting the collision before it collides
@@ -395,7 +396,7 @@ function animate() {
       // background.position.x -= 5;
       // testBoundary.position.x -= 5;
       Movables.forEach((movables) => {
-        movables.position.x -= 3;
+        movables.position.x -= 5;
       });
   }
 }
