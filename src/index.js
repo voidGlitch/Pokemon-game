@@ -61,6 +61,15 @@ ForegroundImage.src = "../Pokemon Assets/Foregroundimg.png";
 const playerImage = new Image();
 playerImage.src = "../Pokemon Assets/playerDown.png";
 
+const playerUpImage = new Image();
+playerUpImage.src = "../Pokemon Assets/playerUp.png";
+const playerDownImage = new Image();
+playerDownImage.src = "../Pokemon Assets/playerDown.png";
+const playerLeftImage = new Image();
+playerLeftImage.src = "../Pokemon Assets/playerLeft.png";
+const playerRightImage = new Image();
+playerRightImage.src = "../Pokemon Assets/playerRight.png";
+
 //created a class sprite in which we are going to define constructor which we can use in neat way
 //A constructor is a special function that creates and initializes an object instance of a class
 
@@ -73,6 +82,12 @@ const player = new Sprite({
   image: playerImage,
   frames: {
     max: 4,
+  },
+  sprites: {
+    up: playerUpImage,
+    down: playerDownImage,
+    left: playerLeftImage,
+    right: playerRightImage,
   },
 });
 
@@ -205,15 +220,18 @@ function animate() {
   //   console.log("colliding");
   // }
   //Step 11 : Collision Final Now we need to predect the future weather the player is going to collide or not
-
+  let moving = true;
+  player.moving = false;
   if (key.w.pressed && lastKey === "w") {
+    player.moving = true;
+    player.image = player.sprites.up;
     // This is logic created to use on press key changes the image of background but now our character position && last key is used to give a smooth animation so that if we press both the key at the same time it won't stuck
     //background.position.y = background.position.y + 3
     // background.position.y += 5;
     // //So as we dont want our collision boundary to move by itself with us we do
     // testBoundary.position.y += 5;
     //11 Creating an variable which return false as soon as our player is going to collide
-    let moving = true;
+
     //11 Moving on
     for (let i = 0; i < boundaries.length; i++) {
       //11 Now we dont have boundary so we define our own
@@ -247,7 +265,9 @@ function animate() {
   } else if (key.a.pressed && lastKey === "a") {
     // background.position.x += 5;
     // testBoundary.position.x += 5; //11 Creating an variable which return false as soon as our player is going to collide
-    let moving = true;
+    player.moving = true;
+    player.image = player.sprites.left;
+
     //11 Moving on
     for (let i = 0; i < boundaries.length; i++) {
       //11 Now we dont have boundary so we define our own
@@ -279,8 +299,11 @@ function animate() {
         movables.position.x += 5;
       });
   } else if (key.s.pressed && lastKey === "s") {
+    player.moving = true;
+    player.image = player.sprites.down;
+
     //11 Creating an variable which return false as soon as our player is going to collide
-    let moving = true;
+
     //11 Moving on
     for (let i = 0; i < boundaries.length; i++) {
       //11 Now we dont have boundary so we define our own
@@ -314,8 +337,11 @@ function animate() {
         movables.position.y -= 5;
       });
   } else if (key.d.pressed && lastKey === "d") {
+    player.moving = true;
+    player.image = player.sprites.right;
+
     //11 Creating an variable which return false as soon as our player is going to collide
-    let moving = true;
+
     //11 Moving on
     for (let i = 0; i < boundaries.length; i++) {
       //11 Now we dont have boundary so we define our own

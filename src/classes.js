@@ -7,17 +7,18 @@ class Sprite {
     frames = {
       max: 1,
     },
+    sprites,
   }) {
     this.position = position;
     this.image = image;
-    this.frames = frames;
+    this.frames = { ...frames, val: 0, elapsed: 0 };
     this.image.onload = () => {
       this.width = this.image.width / this.frames.max;
-      this.height = this.image.height / this.frames.max;
+      this.height = this.image.height;
       // Firstly it will give us the width and height of bg image and then of the players
-      console.log(this.width);
-      console.log(this.height);
     };
+    this.moving = false;
+    this.sprites = sprites;
   }
   //as image is outside the class so we need to define it inside the class body
   draw() {
@@ -26,7 +27,7 @@ class Sprite {
     //9 We comment out upper code because we need only one draw function but the position is sliced by the previous player draw funtion
     c.drawImage(
       this.image,
-      0,
+      this.frames.val * this.width,
       0,
       this.image.width / this.frames.max,
       this.image.height,
@@ -40,6 +41,18 @@ class Sprite {
       this.image.width / this.frames.max,
       this.image.height
     );
+    if (this.moving) {
+      if (this.frames.max > 1) {
+        this.frames.elapsed++;
+      }
+      if (this.frames.elapsed % 10 === 0) {
+        if (this.frames.val < this.frames.max - 1) {
+          this.frames.val++;
+        } else {
+          this.frames.val = 0;
+        }
+      }
+    }
   }
 }
 //Now we created a class which will represent our rectangle tiles in red colour
