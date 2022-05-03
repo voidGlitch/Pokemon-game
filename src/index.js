@@ -1,5 +1,6 @@
 //selector query selects a particular element in the html given in the feilds
 const canvas = document.querySelector("canvas");
+console.log(BattleZonesData);
 //getContext() method returns a drawing context on the canvas, or null if the context identifier is not supported, or the canvas has already been set to a different context mode.
 const c = canvas.getContext("2d");
 canvas.width = 1250;
@@ -9,6 +10,11 @@ canvas.height = 600;
 // c.fillStyle = "white";
 // c.fillRect(0, 0, canvas.width, canvas.height);
 
+const battleZonesMap = [];
+for (let i = 0; i < BattleZonesData.length; i += 70) {
+  battleZonesMap.push(BattleZonesData.slice(i, 70 + i));
+}
+console.log(battleZonesMap);
 //Step-2 array of 40 array with 70 items each
 const collisionMap = [];
 
@@ -28,6 +34,23 @@ const offset = {
   x: -300,
   y: -900,
 };
+const battleZones = [];
+battleZonesMap.forEach((row, i) => {
+  row.forEach((Symbol, j) => {
+    if (Symbol === 1025) {
+      battleZones.push(
+        new Boundary({
+          position: {
+            x: j * Boundary.width + offset.x,
+            y: i * Boundary.height + offset.y,
+          },
+        })
+      );
+    }
+  });
+});
+// console.log(battleZones);
+
 const boundaries = [];
 //Step 4 so now we need to sign the boundaries precisely on map based off this collision map where our 1025 is the array
 collisionMap.forEach((row, i) => {
@@ -154,7 +177,7 @@ const key = {
 // Step 8 Now as our project is expanding we are declaring some items as movables items and then iterate over them to increment their positions
 //Step 10 Now as our collision is complete we can now move toward real boundary instead of a temporary one
 // const Movables = [background, testBoundary];
-const Movables = [background, ...boundaries, ForeBackground];
+const Movables = [background, ...boundaries, ForeBackground, ...battleZones];
 function rectangularCollison({ rectangle1, rectangle2 }) {
   return (
     //for left collision
@@ -186,6 +209,9 @@ function animate() {
     //   //9 Now we check in here if the position of player x + its width i.e to get full player body is greater than the position of colliding boundary at x axis
     //   console.log("colliding");
     // }
+  });
+  battleZones.forEach((battlezone) => {
+    battlezone.draw();
   });
   player.draw();
   //Rendering foreground as last thing to do
@@ -222,6 +248,37 @@ function animate() {
   //Step 11 : Collision Final Now we need to predect the future weather the player is going to collide or not
   let moving = true;
   player.moving = false;
+
+  /* Battle zone activation */
+  if (key.w.pressed || key.a.pressed || key.s.pressed || key.d.pressed) {
+    for (let i = 0; i < battleZones.length; i++) {
+      const battleZone = battleZones[i];
+      const overlappingArea =
+        (Math.min(
+          player.position.x + player.width,
+          battleZone.position.x + battleZone.width
+        ) -
+          Math.max(player.position.x, battleZone.position.x)) *
+        (Math.min(
+          player.position.y + player.height,
+          battleZone.position.y + battleZone.height
+        ) -
+          Math.max(player.position.y, battleZone.position.y));
+
+      if (
+        rectangularCollison({
+          rectangle1: player,
+          rectangle2: battleZone,
+        }) &&
+        overlappingArea > (player.width * player.height) / 2 &&
+        Math.random() < 0.01
+      ) {
+        console.log("Battle Zone Collision");
+        break;
+      }
+    }
+  }
+  /* ******************* */
   if (key.w.pressed && lastKey === "w") {
     player.moving = true;
     player.image = player.sprites.up;
@@ -258,6 +315,7 @@ function animate() {
         break;
       }
     }
+
     if (moving)
       Movables.forEach((movables) => {
         movables.position.y += 5;

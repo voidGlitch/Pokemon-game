@@ -13,6 +13,7 @@ class Sprite {
     this.image = image;
     this.frames = { ...frames, val: 0, elapsed: 0 };
     this.image.onload = () => {
+      //192/4
       this.width = this.image.width / this.frames.max;
       this.height = this.image.height;
       // Firstly it will give us the width and height of bg image and then of the players
@@ -69,7 +70,7 @@ class Boundary {
   draw() {
     // NOW we used fill color red of canvas context and define the position of x and y
     // c.fillStyle = "red";
-    c.fillStyle = "rgba(255,0,0,0)";
+    c.fillStyle = "rgba(255,0,0,0.5)";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 }
